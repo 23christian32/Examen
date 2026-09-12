@@ -1,0 +1,31 @@
+meta {
+  name: 02 - Get All Reports
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/reports
+  body: none
+  auth: none
+}
+
+tests {
+  test("responde 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("devuelve un arreglo de reportes", function () {
+    expect(res.getBody()).to.be.an("array");
+  });
+
+  test("incluye el reporte recien creado", function () {
+    const ids = res.getBody().map((r) => String(r.id));
+    expect(ids).to.include(String(bru.getEnvVar("reportId")));
+  });
+}
+
+docs {
+  Lista todos los reportes de fugas registrados. Correlo despues de
+  "01 - Create Report" para ver el reporte recien creado en la lista.
+}

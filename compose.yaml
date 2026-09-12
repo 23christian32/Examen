@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: water-leaks-api-db
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret123
+      - POSTGRES_DB=waterleaksdb
+    volumes:
+      - water_leaks_db_data:/var/lib/postgresql/data
+
+volumes:
+  water_leaks_db_data:
