@@ -6,6 +6,7 @@ import { CreateReportDto } from './dtos/create-report.dto';
 import { generateReportTemplate } from './templates/report.template';
 import { EmailService } from '../email/email.service';
 import { envs } from '../config/envs';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class ReportsService {
@@ -15,10 +16,15 @@ export class ReportsService {
     @InjectRepository(Report)
     private readonly reportRepository: Repository<Report>,
     private readonly emailService: EmailService,
+    private readonly storageService: StorageService,
   ) {}
 
-  async create(dto: CreateReportDto): Promise<Report> {
-    const report = this.reportRepository.create(dto);
+  async create(
+    dto: CreateReportDto,
+    photo: Express.Multer.File,
+  ): Promise<Report> {
+    const photoUrl = await this.storageService.uploadFile(photo, 'reports/');
+    const report = this.reportRepository.create({ ...dto, photoUrl });
     const saved = await this.reportRepository.save(report);
 
     // No se espera el envio del correo: si el SMTP esta lento o caido, el
@@ -33,7 +39,7 @@ export class ReportsService {
       .sendEmail(
         envs.MAINTENANCE_EMAIL,
         `Nuevo reporte de fuga - ${dto.address}`,
-        generateReportTemplate(dto),
+        generateReportTemplate(dto, saved.photoUrl!),
       )
       .catch((error: Error) => {
         this.logger.warn(

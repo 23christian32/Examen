@@ -1,15 +1,47 @@
 services:
   postgres:
-    image: postgres:16
-    container_name: water-leaks-api-db
-    ports:
-      - 5432:5432
+    image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=secret123
-      - POSTGRES_DB=waterleaksdb
+      POSTGRES_USER: ${DB_USER:?Configura DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:?Configura DB_NAME}
+    ports:
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
     volumes:
       - water_leaks_db_data:/var/lib/postgresql/data
-
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  migrate:
+    image: ${DOCKER_USER:?Configura DOCKER_USER}/aguafix:latest
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    command:
+      [
+        'node',
+        'node_modules/typeorm/cli.js',
+        '-d',
+        'dist/db/data-source.js',
+        'migration:run',
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    image: ${DOCKER_USER:?Configura DOCKER_USER}/aguafix:latest
+    env_file: .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      PORT: 3000
+    ports:
+      - '${PORT:-3000}:3000'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
 volumes:
   water_leaks_db_data:

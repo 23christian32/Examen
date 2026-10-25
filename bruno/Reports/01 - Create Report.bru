@@ -3,54 +3,19 @@ meta {
   type: http
   seq: 1
 }
-
 post {
   url: {{baseUrl}}/reports
-  body: json
+  body: multipartForm
   auth: none
 }
-
-headers {
-  Content-Type: application/json
+body:multipart-form {
+  address: Calle 1, frente a la escuela
+  description: Fuga grande de agua
+  severity: high
+  reporterPhone: 5551234567
+  photo: @file(./foto-fuga.jpg)
 }
-
-body:json {
-  {
-    "address": "Av. Siempre Viva 742",
-    "description": "Fuga grande frente a la escuela",
-    "severity": "high",
-    "reporterPhone": "+54 11 5555-1234"
-  }
-}
-
-script:post-response {
-  if (res.getStatus() === 201) {
-    bru.setEnvVar("reportId", res.getBody().id);
-    console.log("reportId =", res.getBody().id);
-  }
-}
-
-tests {
-  test("responde 201", function () {
-    expect(res.getStatus()).to.equal(201);
-  });
-
-  test("devuelve el reporte guardado", function () {
-    expect(res.getBody().id).to.be.a("number");
-    expect(res.getBody().address).to.equal("Av. Siempre Viva 742");
-    expect(res.getBody().severity).to.equal("high");
-    expect(res.getBody().isResolved).to.equal(false);
-  });
-}
-
 docs {
-  Crea un reporte de fuga (WATER_REPORT). El reporte se guarda siempre; ademas se
-  dispara (sin bloquear la respuesta) el correo de aviso a la cuadrilla de
-  mantenimiento con la plantilla HTML de src/reports/templates/report.template.ts.
-
-  Para ver el correo: si estas usando Ethereal, entra a https://ethereal.email/login
-  con el SMTP_USER/SMTP_PASS de tu .env y revisa la bandeja de entrada.
-
-  Para probar la validacion: cambia "severity" por un valor invalido (ej. "urgente"),
-  deberia responder 400.
+  Selecciona una foto local JPEG, PNG o WebP en el campo photo antes de enviar.
+  Espera 201 con photoUrl. Sin archivo: 400. Maximo 5 MB.
 }

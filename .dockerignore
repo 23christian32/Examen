@@ -1,0 +1,14 @@
+.env
+.env.*
+compose.yaml
+compose*.yml
+compose*.yaml
+node_modules
+dist
+.git
+.github
+coverage
+bruno
+test
+examen
+*.log

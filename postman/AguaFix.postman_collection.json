@@ -1,0 +1,54 @@
+{
+  "info": {
+    "name": "AguaFix - fotos S3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:3000/api" }],
+  "item": [
+    {
+      "name": "Crear reporte con foto",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/reports",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "address",
+              "value": "Calle 1, frente a la escuela",
+              "type": "text"
+            },
+            {
+              "key": "description",
+              "value": "Fuga de agua en banqueta",
+              "type": "text"
+            },
+            { "key": "severity", "value": "high", "type": "text" },
+            { "key": "reporterPhone", "value": "5551234567", "type": "text" },
+            { "key": "photo", "type": "file", "src": [] }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar reportes",
+      "request": { "method": "GET", "url": "{{baseUrl}}/reports" }
+    },
+    {
+      "name": "Sin foto - espera 400",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/reports",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "address", "value": "Calle 1", "type": "text" },
+            { "key": "description", "value": "Fuga", "type": "text" },
+            { "key": "severity", "value": "high", "type": "text" },
+            { "key": "reporterPhone", "value": "5551234567", "type": "text" }
+          ]
+        }
+      }
+    }
+  ]
+}
